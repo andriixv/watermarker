@@ -1,0 +1,1165 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Водяний штамп</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: settings rail on the left; pipeline strip, results and live page previews on the right. */
+:root{
+  --bg:#E8ECF2;
+  --surface:#F7F9FC;
+  --surface-2:#EBEFF5;
+  --ink:#14203A;
+  --ink-2:#4B5877;
+  --line:#CBD3E1;
+  --accent:#2C43CE;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DDE3FB;
+  --ok:#1D7A4C;
+  --err:#B3261E;
+  --paper:#FFFFFF;
+  --shadow:0 1px 2px rgba(20,32,58,.10),0 8px 24px rgba(20,32,58,.10);
+  --f-body:Onest,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-display:Unbounded,Onest,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1117;--surface:#161B24;--surface-2:#1D2330;--ink:#E6E9F2;--ink-2:#98A3BD;--line:#2A3243;
+    --accent:#8FA3FF;--accent-ink:#0E1117;--accent-soft:#242C4D;--ok:#5ECB95;--err:#FF8F86;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1117;--surface:#161B24;--surface-2:#1D2330;--ink:#E6E9F2;--ink-2:#98A3BD;--line:#2A3243;
+  --accent:#8FA3FF;--accent-ink:#0E1117;--accent-soft:#242C4D;--ok:#5ECB95;--err:#FF8F86;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--bg);color:var(--ink);
+  font:400 15px/1.5 var(--f-body);
+  padding-block:14px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1260px;margin-inline:auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;padding-block:6px 18px}
+.brand{display:flex;align-items:center;gap:10px;font:600 15px/1 var(--f-display);letter-spacing:.01em;margin:0}
+.brand svg{flex:none;color:var(--accent)}
+.tagline{margin:0;color:var(--ink-2);font-size:13.5px;max-width:62ch;min-width:0}
+
+.app{display:grid;grid-template-columns:minmax(300px,356px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}}
+
+/* rail */
+.rail{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:18px;min-width:0;
+  position:sticky;top:14px;max-height:calc(100vh - 28px);overflow:auto;
+}
+@media (max-width:860px){.rail{position:static;max-height:none;overflow:visible}}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:grid;gap:12px}
+fieldset:disabled{opacity:.6}
+legend{font:500 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);padding:0;margin-bottom:12px}
+.field{display:grid;gap:6px;min-width:0}
+.lbl{font:500 12.5px/1.2 var(--f-body);color:var(--ink-2)}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+
+.drop{
+  display:grid;gap:4px;justify-items:start;padding:16px;border:1.5px dashed var(--line);border-radius:10px;
+  background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s;
+}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop strong{font-weight:600;font-size:15px}
+.drop span{color:var(--ink-2);font-size:13px}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.drop:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.filelist{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:232px;overflow:auto;min-width:0}
+.fitem{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);min-width:0}
+.fitem[aria-current=true]{border-color:var(--accent);background:var(--accent-soft)}
+.fitem .pick{display:grid;gap:2px;text-align:left;background:none;border:0;padding:8px 6px 8px 10px;cursor:pointer;min-width:0;border-radius:8px}
+.fitem .fname{font-weight:500;font-size:13.5px;overflow-wrap:anywhere;line-height:1.35}
+.fitem .fmeta{font:400 11.5px/1.35 var(--f-mono);color:var(--ink-2);overflow-wrap:anywhere}
+.fstatus.ok{color:var(--ok)}
+.fstatus.err{color:var(--err)}
+.fstatus.run{color:var(--accent)}
+.fstatus.old{font-style:italic}
+.fitem .x{background:none;border:0;padding:0 11px;cursor:pointer;color:var(--ink-2);font-size:18px;line-height:1;border-radius:8px}
+.fitem .x:hover{color:var(--err)}
+.filenote{margin:0;color:var(--ink-2);font-size:12.5px}
+.batchline{margin:0;font:500 12.5px/1.4 var(--f-mono);color:var(--ink-2);overflow-wrap:anywhere}
+.badge{display:inline-block;font:500 11px/1 var(--f-mono);padding:3px 6px;border-radius:4px;background:var(--accent);color:var(--accent-ink);margin-right:6px;vertical-align:1px}
+
+.seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px;padding:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{text-align:center;padding:7px 6px;border-radius:6px;cursor:pointer;font-size:13.5px;color:var(--ink-2);user-select:none}
+.seg input:checked+label{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(0,0,0,.08)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:1px}
+
+textarea,select,input[type=text]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+textarea{resize:vertical;min-height:58px;line-height:1.35}
+textarea:focus,select:focus{border-color:var(--accent)}
+input[type=color]{width:44px;height:36px;padding:2px;background:var(--surface);border:1px solid var(--line);border-radius:6px;cursor:pointer}
+input[type=file].plain{width:100%;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;padding-bottom:8px}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.slider{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:baseline}
+.slider output{font:500 12px/1 var(--f-mono);color:var(--ink)}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--accent);margin:4px 0 0}
+
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 14px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;padding:12px 18px;font-size:15px}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);color:var(--accent-ink)}
+.btn.stop{background:var(--err);border-color:var(--err);color:var(--bg)}
+.btn.small{padding:6px 10px;font-size:13px}
+.runbar{display:grid;gap:8px;position:sticky;bottom:0;background:linear-gradient(to top,var(--surface) 70%,transparent);padding-top:10px}
+
+/* stage */
+.stage{display:grid;gap:16px;min-width:0}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:10px}
+@media (max-width:700px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px 10px;display:grid;gap:3px;min-width:0;transition:border-color .15s}
+.step .no{font:500 11px/1 var(--f-mono);color:var(--ink-2);letter-spacing:.06em}
+.step h3{margin:2px 0 0;font:600 14px/1.25 var(--f-body)}
+.step p{margin:0;font-size:12.5px;color:var(--ink-2);min-height:1.45em;overflow-wrap:anywhere}
+.bar{height:3px;background:var(--surface-2);border-radius:2px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:var(--p,0%);background:var(--accent);transition:width .12s}
+.step[data-state=running]{border-color:var(--accent)}
+.step[data-state=done]{border-color:var(--ok)}
+.step[data-state=done] .no::after{content:"  ✓";color:var(--ok)}
+.step[data-state=done] .bar i{background:var(--ok)}
+.step[data-state=error]{border-color:var(--err)}
+.step[data-state=error] p{color:var(--err)}
+.step[data-state=error] .bar i{background:var(--err)}
+
+.banner{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:13.5px}
+.banner.err{border-color:var(--err);color:var(--err)}
+
+.results{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 16px 14px;display:grid;gap:0;min-width:0}
+.results.stale .res,.results.stale .thumbs{opacity:.5}
+.stalenote{margin:10px 0 0;padding:8px 10px;border-radius:6px;background:var(--accent-soft);font-size:13px}
+.res{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.fbody .res:last-child{border-bottom:0}
+.fileres{border-bottom:1px solid var(--line)}
+.fileres summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0;cursor:pointer;list-style:none;min-width:0}
+.fileres summary::-webkit-details-marker{display:none}
+.fileres summary::before{content:"▸";color:var(--ink-2);font-size:12px;transition:transform .12s}
+.fileres[open] summary::before{transform:rotate(90deg)}
+.fileres summary b{font-weight:600;overflow-wrap:anywhere;min-width:0}
+.fileres summary .meta{font:400 12px/1.3 var(--f-mono);color:var(--ink-2);margin-left:auto}
+.fileres .fbody{padding-left:20px}
+.results.stale .fileres .res,.results.stale .fileres .thumbs{opacity:.5}
+.res h3{margin:0;font:600 14.5px/1.3 var(--f-body)}
+.res p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.res .meta{font:400 12px/1.3 var(--f-mono);color:var(--ink-2)}
+.thumbs{grid-column:1/-1;display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px}
+.thumb{flex:none;border:1px solid var(--line);background:var(--paper);padding:0;border-radius:3px;cursor:pointer;line-height:0;position:relative}
+.thumb:hover{border-color:var(--accent)}
+.thumb img{height:92px;width:auto;display:block;border-radius:2px}
+.thumb span{position:absolute;left:3px;bottom:3px;font:500 10px/1 var(--f-mono);padding:2px 4px;border-radius:3px;background:var(--ink);color:var(--bg)}
+.allbar{display:flex;justify-content:flex-end;padding-top:12px}
+
+/* preview */
+.previewhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.previewhead h2{margin:0;font:500 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.previewhead p{margin:0;font-size:13px;color:var(--ink-2)}
+.preview{display:grid;gap:22px;justify-items:center;min-width:0;padding:6px 0 8px}
+.pagewrap{margin:0;width:min(100%,620px);display:grid;gap:6px}
+.page{position:relative;width:100%;background:var(--paper);box-shadow:var(--shadow);border-radius:2px;overflow:hidden}
+.page .base{position:absolute;inset:0;overflow:hidden}
+.page canvas{display:block}
+.page canvas.pdfbase{width:100%;height:100%}
+.page canvas.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.page .scaler{position:absolute;left:0;top:0;transform-origin:0 0}
+.pagewrap figcaption{font:400 11.5px/1 var(--f-mono);color:var(--ink-2);display:flex;justify-content:space-between}
+.sample-tag{background:var(--accent-soft);color:var(--accent);padding:2px 6px;border-radius:4px}
+.loading{padding:40px 0;color:var(--ink-2);font-size:14px}
+
+.offscreen{position:absolute;left:-100000px;top:0;visibility:visible;pointer-events:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:13.5px;max-width:min(92vw,520px);z-index:20;box-shadow:var(--shadow)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="4.5" y="2.5" width="17" height="21" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h10M8 12h10M8 16h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".45"/><path d="M5 20 21 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".9"/></svg>
+      Водяний штамп
+    </h1>
+    <p class="tagline">Один або кілька файлів PDF чи Word: водяний знак, зображення сторінок і новий PDF. Усе рахується в браузері, файли нікуди не надсилаються.</p>
+  </header>
+
+  <div class="app">
+    <aside class="rail" aria-label="Налаштування">
+      <fieldset id="fs-file">
+        <legend>Файл</legend>
+        <label class="drop" id="drop" for="file">
+          <strong id="drop-title">Перетягніть PDF або Word</strong>
+          <span id="drop-hint">Формати .pdf і .docx, можна кілька файлів одразу. Або натисніть, щоб вибрати.</span>
+          <input type="file" id="file" multiple accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+        </label>
+        <ul class="filelist" id="filelist" hidden aria-label="Файли в черзі"></ul>
+        <button type="button" class="btn small" id="clear" hidden>Очистити список</button>
+        <p class="filenote" id="filenote" hidden>Шрифти Word, яких немає на цьому пристрої, замінюються схожими, тому розбивка на сторінки може трохи відрізнятися від Word.</p>
+      </fieldset>
+
+      <fieldset id="fs-wm">
+        <legend>Водяний знак</legend>
+        <div class="seg" role="radiogroup" aria-label="Тип знака">
+          <input type="radio" name="wm-mode" id="mode-text" value="text" checked><label for="mode-text">Текст</label>
+          <input type="radio" name="wm-mode" id="mode-image" value="image"><label for="mode-image">Зображення</label>
+        </div>
+
+        <div id="box-text" class="field-group" style="display:grid;gap:12px">
+          <div class="field">
+            <label class="lbl" for="wm-text">Текст знака</label>
+            <textarea id="wm-text" rows="2" spellcheck="false">КОНФІДЕНЦІЙНО</textarea>
+            <div class="chips" id="presets">
+              <button type="button" class="chip" data-text="КОНФІДЕНЦІЙНО">Конфіденційно</button>
+              <button type="button" class="chip" data-text="КОПІЯ">Копія</button>
+              <button type="button" class="chip" data-text="ЧЕРНЕТКА">Чернетка</button>
+              <button type="button" class="chip" data-text="ЗРАЗОК">Зразок</button>
+              <button type="button" class="chip" data-text="ДЛЯ ВНУТРІШНЬОГО ВИКОРИСТАННЯ">Внутрішнє</button>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label class="lbl" for="wm-font">Шрифт</label>
+              <select id="wm-font">
+                <option value="Arial, Helvetica, sans-serif">Arial (без засічок)</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia (із засічками)</option>
+                <option value="'Courier New', Courier, monospace">Courier (моноширинний)</option>
+                <option value="Impact, 'Arial Black', sans-serif">Impact (щільний)</option>
+              </select>
+            </div>
+            <label class="check" for="wm-bold"><input type="checkbox" id="wm-bold" checked>Жирний</label>
+          </div>
+          <div class="field">
+            <label class="lbl" for="wm-color">Колір</label>
+            <input type="color" id="wm-color" value="#6b7280">
+          </div>
+        </div>
+
+        <div id="box-image" class="field" hidden>
+          <label class="lbl" for="wm-image">Зображення знака (PNG, JPG, SVG)</label>
+          <input class="plain" type="file" id="wm-image" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+          <span class="lbl" id="wm-image-name">Файл не вибрано</span>
+        </div>
+
+        <div class="slider"><label class="lbl" for="wm-size">Розмір</label><output id="o-size" for="wm-size">9%</output><input type="range" id="wm-size" min="2" max="30" step="0.5" value="9"></div>
+        <div class="slider"><label class="lbl" for="wm-opacity">Прозорість</label><output id="o-opacity" for="wm-opacity">22%</output><input type="range" id="wm-opacity" min="5" max="100" step="1" value="22"></div>
+        <div class="slider"><label class="lbl" for="wm-angle">Кут нахилу</label><output id="o-angle" for="wm-angle">−35°</output><input type="range" id="wm-angle" min="-90" max="90" step="1" value="-35"></div>
+
+        <div class="field">
+          <span class="lbl" id="lbl-layout">Розташування</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-layout">
+            <input type="radio" name="wm-layout" id="lay-center" value="center" checked><label for="lay-center">По центру</label>
+            <input type="radio" name="wm-layout" id="lay-tile" value="tile"><label for="lay-tile">Мозаїка</label>
+            <input type="radio" name="wm-layout" id="lay-bottom" value="bottom"><label for="lay-bottom">Знизу</label>
+          </div>
+        </div>
+        <div class="slider" id="box-gap" hidden><label class="lbl" for="wm-gap">Відступ у мозаїці</label><output id="o-gap" for="wm-gap">10%</output><input type="range" id="wm-gap" min="0" max="40" step="1" value="10"></div>
+      </fieldset>
+
+      <fieldset id="fs-ex">
+        <legend>Експорт</legend>
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="ex-format">Формат зображень</label>
+            <select id="ex-format"><option value="jpeg">JPEG (легший)</option><option value="png">PNG (без втрат)</option></select>
+          </div>
+          <div class="field">
+            <label class="lbl" for="ex-dpi">Роздільність</label>
+            <select id="ex-dpi"><option value="100">100 dpi</option><option value="150" selected>150 dpi</option><option value="200">200 dpi</option><option value="300">300 dpi</option></select>
+          </div>
+        </div>
+        <div class="slider" id="box-quality"><label class="lbl" for="ex-quality">Якість JPEG</label><output id="o-quality" for="ex-quality">90%</output><input type="range" id="ex-quality" min="50" max="100" step="1" value="90"></div>
+      </fieldset>
+
+      <div class="runbar">
+        <button type="button" class="btn primary" id="run" disabled>Обробити документ</button>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div id="banner" class="banner err" hidden></div>
+      <p class="batchline" id="batchline" hidden role="status"></p>
+      <ol class="steps" id="steps" aria-label="Етапи обробки"></ol>
+      <section class="results" id="results" hidden aria-live="polite"></section>
+
+      <section aria-label="Перегляд сторінок">
+        <div class="previewhead">
+          <h2>Перегляд</h2>
+          <p id="preview-note">Так виглядатиме ваш документ. Завантажте файл ліворуч, щоб побачити його сторінки.</p>
+        </div>
+        <div class="preview" id="preview"></div>
+      </section>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+<div id="docx-styles" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const sleep0 = () => new Promise(r => setTimeout(r, 0));
+const fmtBytes = n => n < 1024 ? n + ' Б' : n < 1048576 ? Math.round(n / 1024) + ' КБ' : (n / 1048576).toFixed(1) + ' МБ';
+const toBlob = (c, type, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Не вдалося створити зображення сторінки (замало пам’яті?)')), type, q));
+const pad = (n, w) => String(n).padStart(w, '0');
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const PT_PER_PX = 0.75; // 1 CSS px = 0.75 pt
+
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 4200);
+}
+
+const libsOk = () => !!(window.pdfjsLib && window.PDFLib && window.JSZip && window.html2canvas && window.docx);
+if (!libsOk()) {
+  const b = $('#banner'); b.hidden = false;
+  b.textContent = 'Не вдалося завантажити бібліотеки обробки (потрібен доступ до cdn.jsdelivr.net). Перевірте з’єднання й оновіть сторінку.';
+}
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
+/* ---------- settings ---------- */
+const sizeDefaults = { text: 9, image: 40 };
+const sizeRange = { text: [2, 30, 0.5], image: [5, 90, 1] };
+const sizeValue = { text: 9, image: 40 };
+let wmImg = null, wmImgName = '';
+let prevAngle = null;
+
+function getWm() {
+  const mode = $('input[name=wm-mode]:checked').value;
+  return {
+    mode,
+    text: $('#wm-text').value,
+    font: $('#wm-font').value,
+    bold: $('#wm-bold').checked,
+    color: $('#wm-color').value,
+    size: parseFloat($('#wm-size').value),
+    opacity: parseFloat($('#wm-opacity').value) / 100,
+    angle: parseFloat($('#wm-angle').value),
+    layout: $('input[name=wm-layout]:checked').value,
+    gap: parseFloat($('#wm-gap').value),
+    img: wmImg,
+  };
+}
+function getEx() {
+  return {
+    format: $('#ex-format').value,
+    dpi: parseInt($('#ex-dpi').value, 10),
+    quality: parseInt($('#ex-quality').value, 10) / 100,
+  };
+}
+const mime = f => f === 'png' ? 'image/png' : 'image/jpeg';
+const ext = f => f === 'png' ? 'png' : 'jpg';
+
+function updateOutputs() {
+  $('#o-size').textContent = $('#wm-size').value + '%';
+  $('#o-opacity').textContent = $('#wm-opacity').value + '%';
+  $('#o-angle').textContent = $('#wm-angle').value.replace('-', '−') + '°';
+  $('#o-gap').textContent = $('#wm-gap').value + '%';
+  $('#o-quality').textContent = $('#ex-quality').value + '%';
+}
+
+/* ---------- watermark drawing (shared by preview, PDF overlay and Word pages) ---------- */
+function measureItem(ctx, w, o) {
+  if (o.mode === 'image') {
+    if (!o.img || !o.img.naturalWidth) return null;
+    const iw = o.size / 100 * w, ih = iw * o.img.naturalHeight / o.img.naturalWidth;
+    return { w: iw, h: ih, draw: (x, y) => ctx.drawImage(o.img, x - iw / 2, y - ih / 2, iw, ih) };
+  }
+  const lines = (o.text || '').split('\n').map(s => s.trimEnd()).filter(s => s.length);
+  if (!lines.length) return null;
+  const fs = o.size / 100 * w;
+  ctx.font = `${o.bold ? '700' : '400'} ${fs}px ${o.font}`;
+  ctx.fillStyle = o.color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const lh = fs * 1.18;
+  let mw = 0; for (const l of lines) mw = Math.max(mw, ctx.measureText(l).width);
+  const bh = lh * lines.length;
+  return { w: mw, h: bh, draw: (x, y) => lines.forEach((l, i) => ctx.fillText(l, x, y - bh / 2 + lh * (i + 0.5))) };
+}
+
+function drawWatermark(ctx, w, h, o) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // html2canvas leaves its own scale/translate on the context
+  ctx.globalAlpha = o.opacity;
+  const it = measureItem(ctx, w, o);
+  if (it) {
+    const rad = o.angle * Math.PI / 180;
+    if (o.layout === 'tile') {
+      const gap = o.gap / 100 * w;
+      const sx = Math.max(it.w + gap, 6), sy = Math.max(it.h + gap * 0.8, 6);
+      const D = Math.hypot(w, h) / 2 + Math.max(it.w, it.h);
+      ctx.translate(w / 2, h / 2); ctx.rotate(rad);
+      let row = 0;
+      for (let y = -D; y <= D; y += sy, row++) {
+        const off = (row % 2) ? sx / 2 : 0;
+        for (let x = -D - sx + off; x <= D; x += sx) it.draw(x, y);
+      }
+    } else if (o.layout === 'bottom') {
+      ctx.translate(w / 2, h * 0.93 - it.h / 2); ctx.rotate(rad); it.draw(0, 0);
+    } else {
+      ctx.translate(w / 2, h / 2); ctx.rotate(rad); it.draw(0, 0);
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------- state ---------- */
+const S = {
+  items: [], activeId: null, nextId: 1,
+  pdfDoc: null,        // pdf.js document of the previewed file
+  token: 0,            // bumped on every preview change
+  ctl: null,           // current run control
+  open: new Set(),     // result blocks the user has expanded
+};
+const activeItem = () => S.items.find(i => i.id === S.activeId) || null;
+const MAX_FILES = 50;
+const pages = [];      // preview page models
+const pageByEl = new Map();
+
+/* ---------- preview ---------- */
+const previewEl = $('#preview');
+let io = null, ro = null;
+
+function resetObservers() {
+  if (io) io.disconnect(); if (ro) ro.disconnect();
+  io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const p = pageByEl.get(e.target); if (!p) continue;
+      if (e.isIntersecting) activate(p); else deactivate(p);
+    }
+  }, { rootMargin: '1200px 0px' });
+  ro = new ResizeObserver(entries => {
+    for (const e of entries) {
+      const p = pageByEl.get(e.target); if (!p) continue;
+      if (p.scaler) p.scaler.style.transform = `scale(${e.contentRect.width / p.w})`;
+      if (p.overlay) sizeOverlay(p);
+    }
+  });
+}
+resetObservers();
+
+function clearPreview() {
+  pages.length = 0; pageByEl.clear();
+  previewEl.replaceChildren();
+  resetObservers();
+}
+
+function addPageBox(w, h, label, tag) {
+  const fig = document.createElement('figure'); fig.className = 'pagewrap';
+  const box = document.createElement('div'); box.className = 'page'; box.style.aspectRatio = `${w} / ${h}`;
+  const base = document.createElement('div'); base.className = 'base'; box.appendChild(base);
+  const cap = document.createElement('figcaption');
+  const a = document.createElement('span'); a.textContent = label; cap.appendChild(a);
+  if (tag) { const t = document.createElement('span'); t.className = 'sample-tag'; t.textContent = tag; cap.appendChild(t); }
+  fig.append(box, cap); previewEl.appendChild(fig);
+  const p = { box, base, w, h, overlay: null, active: false, scaler: null, rendered: false };
+  pages.push(p); pageByEl.set(box, p);
+  io.observe(box); ro.observe(box);
+  return p;
+}
+
+function sizeOverlay(p) {
+  const cw = p.box.clientWidth, ch = p.box.clientHeight; if (!cw) return;
+  const W = Math.round(cw * DPR), H = Math.round(ch * DPR);
+  if (p.overlay.width !== W || p.overlay.height !== H) { p.overlay.width = W; p.overlay.height = H; }
+  drawOverlay(p);
+}
+function drawOverlay(p) {
+  const c = p.overlay; if (!c) return;
+  const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
+  drawWatermark(ctx, c.width, c.height, getWm());
+}
+let queue = Promise.resolve();
+function activate(p) {
+  if (p.active) return; p.active = true;
+  p.overlay = document.createElement('canvas'); p.overlay.className = 'overlay'; p.box.appendChild(p.overlay);
+  sizeOverlay(p);
+  if (p.render && !p.rendered) { const tk = S.token; queue = queue.then(() => tk === S.token && p.active ? p.render(p) : null).catch(() => {}); }
+}
+function deactivate(p) {
+  if (!p.active) return; p.active = false;
+  if (p.overlay) { p.overlay.width = 0; p.overlay.remove(); p.overlay = null; }
+  if (p.free && p.rendered) { p.free(p); p.rendered = false; }
+}
+let raf = 0;
+function scheduleRedraw() {
+  if (raf) return;
+  raf = requestAnimationFrame(() => { raf = 0; pages.forEach(p => p.active && drawOverlay(p)); checkStale(); });
+}
+
+function showSample() {
+  S.token++; S.pdfDoc = null; clearPreview();
+  const p = addPageBox(210, 297, 'Приклад сторінки', 'приклад');
+  const c = document.createElement('canvas'); c.width = 840; c.height = 1188; c.className = 'pdfbase'; p.base.appendChild(c);
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 840, 1188);
+  x.fillStyle = '#1b2440'; x.font = '600 34px Onest, Arial, sans-serif'; x.fillText('Договір про надання послуг', 70, 120);
+  x.fillStyle = '#6a7390'; x.font = '400 22px Onest, Arial, sans-serif'; x.fillText('№ 24-10/2026 від 24 жовтня 2026 р.', 70, 160);
+  x.fillStyle = '#d3d8e4';
+  let y = 230; const widths = [700, 690, 705, 640, 700, 520, 0, 700, 685, 700, 610, 0, 700, 690, 450, 0, 700, 705, 680, 560];
+  for (const wd of widths) { if (wd) x.fillRect(70, y, wd, 12); y += 36; }
+  x.fillStyle = '#1b2440'; x.fillRect(70, 1020, 220, 3); x.fillRect(520, 1020, 220, 3);
+  $('#preview-note').textContent = 'Так виглядатиме ваш документ. Завантажте файл ліворуч, щоб побачити його сторінки.';
+}
+
+async function buildPdfPreview(pdfDoc, token) {
+  clearPreview();
+  const n = pdfDoc.numPages;
+  for (let i = 1; i <= n; i++) {
+    if (token !== S.token) return;
+    const pg = await pdfDoc.getPage(i);
+    const vp = pg.getViewport({ scale: 1 });
+    const p = addPageBox(vp.width, vp.height, `Стор. ${i} з ${n}`);
+    p.pageNo = i;
+    p.render = async (pp) => {
+      const page = await pdfDoc.getPage(pp.pageNo);
+      const cw = pp.box.clientWidth || 600;
+      const base = page.getViewport({ scale: 1 });
+      const vpp = page.getViewport({ scale: cw * DPR / base.width });
+      const c = document.createElement('canvas'); c.className = 'pdfbase'; c.width = Math.round(vpp.width); c.height = Math.round(vpp.height);
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vpp, background: '#ffffff' }).promise;
+      if (token !== S.token || !pp.active) { c.width = 0; return; }
+      pp.base.replaceChildren(c); pp.rendered = true;
+    };
+    p.free = (pp) => { const c = pp.base.firstChild; if (c) c.width = 0; pp.base.replaceChildren(); };
+    if (i % 20 === 0) await sleep0();
+  }
+}
+
+const DOCX_OPTS = {
+  className: 'docx', inWrapper: false, ignoreWidth: false, ignoreHeight: false, ignoreFonts: false,
+  breakPages: true, ignoreLastRenderedPageBreak: false, experimental: true, trimXmlDeclaration: true,
+  useBase64URL: true, renderHeaders: true, renderFooters: true, renderFootnotes: true, renderEndnotes: true,
+};
+
+// Word stores no hard page boundaries, so a section that outgrew its page height is split
+// between top-level blocks into several pages, repeating the header and footer.
+function pageMinHeightPx(sec) {
+  const m = /^([\d.]+)(pt|px)$/.exec(sec.style.minHeight || '');
+  if (!m) return 1122.5;
+  return parseFloat(m[1]) * (m[2] === 'pt' ? 96 / 72 : 1);
+}
+function splitSection(sec) {
+  const Hp = pageMinHeightPx(sec);
+  if (sec.offsetHeight <= Hp + 1) return [sec];
+  const article = sec.querySelector(':scope > article'); if (!article) return [sec];
+  const kids = [...article.children];
+  kids.forEach(k => k.remove());
+  const out = [sec]; let cur = sec;
+  const newPage = () => {
+    const nxt = sec.cloneNode(false);
+    const hd = sec.querySelector(':scope > header'), ft = sec.querySelector(':scope > footer');
+    if (hd) nxt.appendChild(hd.cloneNode(true));
+    const a = article.cloneNode(false); nxt.appendChild(a);
+    if (ft) nxt.appendChild(ft.cloneNode(true));
+    cur.after(nxt); return nxt;
+  };
+  for (const k of kids) {
+    const a = cur.querySelector(':scope > article');
+    a.appendChild(k);
+    if (cur.offsetHeight > Hp + 1 && a.children.length > 1) {
+      cur = newPage(); cur.querySelector(':scope > article').appendChild(k); out.push(cur);
+    }
+  }
+  return out;
+}
+
+async function renderDocxInto(host, styleHost, buf) {
+  await docx.renderAsync(buf.slice(0), host, styleHost, DOCX_OPTS);
+  if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+  const secs = $$('section.docx', host).flatMap(splitSection);
+  if (!secs.length) throw new Error('У документі не знайдено сторінок.');
+  return secs;
+}
+
+async function buildDocxPreview(buf, token) {
+  clearPreview();
+  const stage = document.createElement('div'); stage.className = 'offscreen'; document.body.appendChild(stage);
+  let secs;
+  try { secs = await renderDocxInto(stage, $('#docx-styles'), buf); }
+  catch (e) { stage.remove(); throw e; }
+  if (token !== S.token) { stage.remove(); return 0; }
+  const n = secs.length;
+  secs.forEach((sec, i) => {
+    const W = sec.offsetWidth, H = sec.offsetHeight;
+    sec.style.height = H + 'px'; sec.style.background = '#fff';
+    const p = addPageBox(W, H, `Стор. ${i + 1} з ${n}`);
+    const scaler = document.createElement('div'); scaler.className = 'scaler'; scaler.style.width = W + 'px'; scaler.style.height = H + 'px';
+    scaler.appendChild(sec); p.base.appendChild(scaler); p.scaler = scaler;
+  });
+  stage.remove();
+  return n;
+}
+
+/* ---------- file list ---------- */
+const fileInput = $('#file'), drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const fs = e.dataTransfer && e.dataTransfer.files; if (fs && fs.length) addFiles(fs); });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value = ''; });
+// drop anywhere on the page
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); const fs = e.dataTransfer && e.dataTransfer.files; if (fs && fs.length && !drop.contains(e.target)) addFiles(fs); });
+
+function friendlyError(e) {
+  const n = e && e.name, m = (e && e.message) || String(e);
+  if (n === 'PasswordException' || /password/i.test(m)) return 'PDF захищено паролем. Зніміть захист і спробуйте знову.';
+  if (n === 'InvalidPDFException' || /Invalid PDF|No PDF header|Failed to parse PDF/i.test(m)) return 'Файл пошкоджено або це не PDF.';
+  if (/end of central directory|zip/i.test(m)) return 'Файл не схожий на справжній .docx.';
+  if (/encrypted/i.test(m)) return 'PDF зашифровано. Зніміть захист і спробуйте знову.';
+  return m;
+}
+
+function fileKind(f) {
+  const low = (f.name || '').toLowerCase();
+  if (low.endsWith('.pdf') || f.type === 'application/pdf') return 'pdf';
+  if (low.endsWith('.docx')) return 'docx';
+  if (low.endsWith('.doc')) return 'doc';
+  return null;
+}
+function uniqueBase(name) {
+  const clean = (name.replace(/\.[^.]+$/, '') || 'document').replace(/[\\/:*?"<>|]+/g, '_');
+  const used = new Set(S.items.map(i => i.base.toLowerCase()));
+  let b = clean, n = 2; while (used.has(b.toLowerCase())) b = `${clean}_${n++}`;
+  return b;
+}
+
+function addFiles(list) {
+  if (S.ctl) { toast('Зачекайте, поки закінчиться обробка, або зупиніть її.'); return; }
+  if (!libsOk()) { toast('Бібліотеки обробки не завантажилися. Оновіть сторінку.'); return; }
+  const added = []; let bad = 0, old = 0, over = false;
+  for (const f of Array.from(list)) {
+    const k = fileKind(f);
+    if (k === 'doc') { old++; continue; }
+    if (!k) { bad++; continue; }
+    if (S.items.length >= MAX_FILES) { over = true; break; }
+    const it = { id: S.nextId++, file: f, name: f.name || 'document', kind: k, size: f.size, base: uniqueBase(f.name || 'document'), buf: null, pageCount: null, status: 'queued', error: '', results: null, key: '' };
+    S.items.push(it); added.push(it);
+  }
+  if (old) toast('Старий формат .doc не підтримується. Збережіть файл у Word як .docx.');
+  else if (over) toast(`У списку може бути до ${MAX_FILES} файлів.`);
+  else if (bad) toast(added.length ? `Пропущено файлів: ${bad}. Підтримуються лише PDF і .docx.` : 'Підтримуються лише файли PDF і Word (.docx).');
+  renderList(); updateRunBtn();
+  if (added.length && !activeItem()) selectItem(added[0]);
+}
+
+function removeItem(it) {
+  if (S.ctl) return;
+  const i = S.items.indexOf(it); if (i < 0) return;
+  S.items.splice(i, 1); S.open.delete(it.id);
+  if (S.activeId === it.id) {
+    S.activeId = null;
+    const next = S.items[Math.min(i, S.items.length - 1)];
+    if (next) selectItem(next); else { showSample(); buildSteps('pdf'); }
+  }
+  renderList(); showResults(); updateRunBtn();
+}
+function clearAll() {
+  if (S.ctl) return;
+  S.items.length = 0; S.activeId = null; S.open.clear();
+  showSample(); buildSteps('pdf'); renderList(); showResults(); updateRunBtn();
+  $('#batchline').hidden = true;
+}
+
+function statusText(it) {
+  if (it.status === 'running') return 'обробка…';
+  if (it.status === 'error') return it.error || 'помилка';
+  if (it.results) return it.key === settingsKey() ? 'готово' : 'потрібно оновити';
+  return 'у черзі';
+}
+function statusClass(it) {
+  if (it.status === 'running') return 'run';
+  if (it.status === 'error') return 'err';
+  if (it.results) return it.key === settingsKey() ? 'ok' : 'old';
+  return '';
+}
+function refreshStatuses() {
+  $$('#filelist .fitem').forEach(li => {
+    const it = S.items.find(i => i.id === +li.dataset.id); if (!it) return;
+    const s = $('.fstatus', li); s.textContent = statusText(it); s.className = 'fstatus ' + statusClass(it);
+  });
+}
+function renderList() {
+  const ul = $('#filelist'); ul.replaceChildren(); ul.hidden = !S.items.length;
+  for (const it of S.items) {
+    const li = document.createElement('li'); li.className = 'fitem'; li.dataset.id = it.id;
+    if (it.id === S.activeId) li.setAttribute('aria-current', 'true');
+    const pick = document.createElement('button'); pick.type = 'button'; pick.className = 'pick';
+    pick.title = 'Показати сторінки цього файлу';
+    const nm = document.createElement('span'); nm.className = 'fname';
+    const bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = it.kind === 'pdf' ? 'PDF' : 'DOCX';
+    nm.append(bd, it.name);
+    const meta = document.createElement('span'); meta.className = 'fmeta';
+    meta.append((it.pageCount ? it.pageCount + ' стор. · ' : '') + fmtBytes(it.size) + ' · ');
+    const st = document.createElement('span'); st.className = 'fstatus'; meta.appendChild(st);
+    pick.append(nm, meta);
+    pick.addEventListener('click', () => { if (!S.ctl && it.id !== S.activeId) selectItem(it); });
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×';
+    x.setAttribute('aria-label', 'Прибрати ' + it.name); x.title = 'Прибрати зі списку';
+    x.addEventListener('click', () => removeItem(it));
+    li.append(pick, x); ul.appendChild(li);
+  }
+  refreshStatuses();
+  $('#clear').hidden = S.items.length < 2;
+  $('#drop-title').textContent = S.items.length ? 'Додати ще файли' : 'Перетягніть PDF або Word';
+  $('#drop-hint').textContent = S.items.length ? 'Можна обрати або перетягнути одразу кілька файлів.' : 'Формати .pdf і .docx, можна кілька файлів одразу. Або натисніть, щоб вибрати.';
+  const note = $('#filenote'); note.hidden = !S.items.some(i => i.kind === 'docx');
+}
+
+function selectItem(it) {
+  if (S.ctl) return;
+  S.activeId = it.id; buildSteps(it.kind); renderList(); previewItem(it);
+}
+
+async function previewItem(it) {
+  const token = ++S.token; S.pdfDoc = null; clearPreview();
+  previewEl.innerHTML = '<div class="loading">Читаю файл…</div>';
+  try {
+    if (!it.buf) it.buf = await it.file.arrayBuffer();
+    if (token !== S.token) return;
+    let n = 0;
+    if (it.kind === 'pdf') {
+      S.pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(it.buf.slice(0)), isEvalSupported: false }).promise;
+      if (token !== S.token) return;
+      n = S.pdfDoc.numPages;
+      await buildPdfPreview(S.pdfDoc, token);
+    } else {
+      n = await buildDocxPreview(it.buf, token);
+    }
+    if (token !== S.token) return;
+    it.pageCount = n; if (it.status === 'error') { it.status = 'queued'; it.error = ''; }
+    renderList();
+    $('#preview-note').textContent = `${it.name}: знак на сторінках оновлюється одразу, коли ви змінюєте налаштування.`;
+  } catch (e) {
+    if (token !== S.token) return;
+    console.error(e);
+    it.status = 'error'; it.error = friendlyError(e);
+    showSample(); renderList(); updateRunBtn();
+    toast(`${it.name}: ${friendlyError(e)}`);
+  }
+}
+
+
+/* ---------- pipeline UI ---------- */
+const FLOWS = {
+  pdf: [
+    ['Накласти знак', 'Додаю знак на кожну сторінку'],
+    ['Експорт у зображення', 'Зображення кожної сторінки'],
+    ['Новий PDF', 'Збираю PDF із зображень'],
+  ],
+  docx: [
+    ['Накласти знак', 'Малюю сторінки Word зі знаком'],
+    ['Перетворити на PDF', 'Збираю PDF зі сторінок'],
+    ['Експорт у зображення', 'Зображення кожної сторінки'],
+    ['Новий PDF', 'Збираю PDF із зображень'],
+  ],
+};
+let stepEls = [];
+function buildSteps(kind) {
+  const list = FLOWS[kind] || FLOWS.pdf;
+  const ol = $('#steps'); ol.replaceChildren(); stepEls = [];
+  ol.style.setProperty('--n', list.length);
+  list.forEach(([title, hint], i) => {
+    const li = document.createElement('li'); li.className = 'step'; li.dataset.state = 'idle'; li.dataset.hint = hint;
+    li.innerHTML = '<span class="no"></span><h3></h3><p></p><div class="bar"><i></i></div>';
+    $('.no', li).textContent = String(i + 1).padStart(2, '0');
+    $('h3', li).textContent = title; $('p', li).textContent = hint;
+    ol.appendChild(li); stepEls.push(li);
+  });
+}
+function step(i, state, text, pct) {
+  const li = stepEls[i]; if (!li) return;
+  li.dataset.state = state;
+  if (text != null) $('p', li).textContent = text;
+  if (pct != null) li.style.setProperty('--p', pct + '%');
+}
+function resetSteps() { stepEls.forEach((li, i) => step(i, 'idle', li.dataset.hint, 0)); }
+
+/* ---------- processing ---------- */
+class Cancelled extends Error {}
+const chk = () => { if (S.ctl && S.ctl.cancelled) throw new Cancelled(); };
+
+function overlayCanvas(vw, vh) {
+  const k = Math.min(3, 2600 / Math.max(vw, vh));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(vw * k)); c.height = Math.max(1, Math.round(vh * k));
+  return c;
+}
+
+async function watermarkPdf(buf, wmo, progress) {
+  const { PDFDocument, degrees } = PDFLib;
+  const doc = await PDFDocument.load(buf.slice(0));
+  const list = doc.getPages(); const cache = new Map();
+  for (let i = 0; i < list.length; i++) {
+    chk();
+    const pg = list[i]; const cb = pg.getCropBox();
+    const rot = ((pg.getRotation().angle % 360) + 360) % 360;
+    const vw = rot % 180 ? cb.height : cb.width, vh = rot % 180 ? cb.width : cb.height;
+    const key = Math.round(vw) + 'x' + Math.round(vh);
+    let img = cache.get(key);
+    if (!img) {
+      const c = overlayCanvas(vw, vh); drawWatermark(c.getContext('2d'), c.width, c.height, wmo);
+      const b = await toBlob(c, 'image/png'); c.width = 0;
+      img = await doc.embedPng(new Uint8Array(await b.arrayBuffer())); cache.set(key, img);
+    }
+    const o = rot === 90 ? { x: cb.x + cb.width, y: cb.y, width: vw, height: vh, rotate: degrees(90) }
+      : rot === 180 ? { x: cb.x + cb.width, y: cb.y + cb.height, width: cb.width, height: cb.height, rotate: degrees(180) }
+      : rot === 270 ? { x: cb.x, y: cb.y + cb.height, width: vw, height: vh, rotate: degrees(270) }
+      : { x: cb.x, y: cb.y, width: cb.width, height: cb.height };
+    pg.drawImage(img, o);
+    progress(i + 1, list.length);
+    if (i % 3 === 2) await sleep0();
+  }
+  return await doc.save();
+}
+
+async function renderDocxPages(buf, ex, wmo, progress) {
+  const stage = document.createElement('div'); stage.className = 'offscreen';
+  const styles = document.createElement('div'); document.body.append(stage, styles);
+  const out = [];
+  try {
+    const secs = await renderDocxInto(stage, styles, buf);
+    await sleep0();
+    const scale = ex.dpi / 96;
+    for (let i = 0; i < secs.length; i++) {
+      chk();
+      const sec = secs[i]; const W = sec.offsetWidth, H = sec.offsetHeight;
+      const c = await html2canvas(sec, { scale, backgroundColor: '#ffffff', useCORS: true, logging: false, width: W, height: H, windowWidth: Math.max(W, 1280), windowHeight: Math.max(H, 800), x: 0, y: 0, scrollX: 0, scrollY: 0 });
+      drawWatermark(c.getContext('2d'), c.width, c.height, wmo);
+      const blob = await toBlob(c, mime(ex.format), ex.quality); c.width = 0;
+      out.push({ blob, format: ex.format, ptW: W * PT_PER_PX, ptH: H * PT_PER_PX });
+      progress(i + 1, secs.length);
+      await sleep0();
+    }
+  } finally { stage.remove(); styles.remove(); }
+  return out;
+}
+
+async function pdfFromImages(items, progress) {
+  const { PDFDocument } = PDFLib;
+  const doc = await PDFDocument.create();
+  doc.setProducer('Водяний штамп'); doc.setCreator('Водяний штамп');
+  for (let i = 0; i < items.length; i++) {
+    chk();
+    const it = items[i]; const bytes = new Uint8Array(await it.blob.arrayBuffer());
+    const img = it.format === 'png' ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+    const pg = doc.addPage([it.ptW, it.ptH]); pg.drawImage(img, { x: 0, y: 0, width: it.ptW, height: it.ptH });
+    progress(i + 1, items.length);
+    if (i % 2) await sleep0();
+  }
+  return new Blob([await doc.save()], { type: 'application/pdf' });
+}
+
+async function exportImages(pdfBytes, ex, base, progress) {
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes.slice()), isEvalSupported: false }).promise;
+  const n = doc.numPages, w = String(n).length < 3 ? 3 : String(n).length;
+  const out = [];
+  try {
+    for (let i = 1; i <= n; i++) {
+      chk();
+      const pg = await doc.getPage(i); const v1 = pg.getViewport({ scale: 1 });
+      const s = Math.min(ex.dpi / 72, 9000 / Math.max(v1.width, v1.height));
+      const vp = pg.getViewport({ scale: s });
+      const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      await pg.render({ canvasContext: c.getContext('2d'), viewport: vp, background: '#ffffff' }).promise;
+      let thumb = null;
+      if (i <= 40) {
+        const t = document.createElement('canvas'); const k = 190 / c.height; t.width = Math.max(1, Math.round(c.width * k)); t.height = 190;
+        t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); thumb = t.toDataURL('image/jpeg', 0.75);
+      }
+      const blob = await toBlob(c, mime(ex.format), ex.quality); c.width = 0; pg.cleanup();
+      out.push({ blob, format: ex.format, ptW: v1.width, ptH: v1.height, name: `${base}_${pad(i, w)}.${ext(ex.format)}`, thumb });
+      progress(i, n);
+      await sleep0();
+    }
+  } finally { doc.destroy(); }
+  return out;
+}
+
+function setRunning(on) {
+  const run = $('#run');
+  $('#fs-file').disabled = on; $('#fs-wm').disabled = on; $('#fs-ex').disabled = on;
+  run.classList.toggle('stop', on);
+  if (on) { run.textContent = 'Зупинити'; run.disabled = false; } else updateRunBtn();
+}
+const todoItems = () => { const key = settingsKey(); return S.items.filter(it => !(it.results && it.key === key)); };
+function updateRunBtn() {
+  if (S.ctl) return;
+  const run = $('#run'), n = todoItems().length;
+  run.disabled = !S.items.length || n === 0;
+  run.textContent = !S.items.length ? 'Обробити документ' : n === 0 ? 'Усе оброблено' : S.items.length > 1 ? `Обробити файли (${n})` : 'Обробити документ';
+}
+
+async function processItem(it, wmo, ex) {
+  if (!it.buf) it.buf = await it.file.arrayBuffer();
+  const docx = it.kind === 'docx'; let cur = 0;
+  try {
+    let wmPdfBytes, wmPdfBlob;
+    step(0, 'running', 'Готую…', 0);
+    if (!docx) {
+      wmPdfBytes = await watermarkPdf(it.buf, wmo, (i, t) => step(0, 'running', `${i} / ${t}`, i / t * 100));
+      wmPdfBlob = new Blob([wmPdfBytes], { type: 'application/pdf' });
+      step(0, 'done', fmtBytes(wmPdfBlob.size), 100);
+    } else {
+      const imgs = await renderDocxPages(it.buf, ex, wmo, (i, t) => step(0, 'running', `${i} / ${t}`, i / t * 100));
+      step(0, 'done', `${imgs.length} стор.`, 100);
+      cur = 1; step(1, 'running', `0 / ${imgs.length}`, 0);
+      wmPdfBlob = await pdfFromImages(imgs, (i, t) => step(1, 'running', `${i} / ${t}`, i / t * 100));
+      wmPdfBytes = new Uint8Array(await wmPdfBlob.arrayBuffer());
+      step(1, 'done', `${imgs.length} стор. · ${fmtBytes(wmPdfBlob.size)}`, 100);
+    }
+    const iExp = docx ? 2 : 1;
+    cur = iExp; step(iExp, 'running', 'Готую…', 0);
+    const images = await exportImages(wmPdfBytes, ex, it.base, (i, t) => step(iExp, 'running', `${i} / ${t}`, i / t * 100));
+    const imgBytes = images.reduce((s, x) => s + x.blob.size, 0);
+    step(iExp, 'done', `${images.length} × ${ext(ex.format).toUpperCase()} · ${fmtBytes(imgBytes)}`, 100);
+    const iFin = iExp + 1;
+    cur = iFin; step(iFin, 'running', `0 / ${images.length}`, 0);
+    const finalPdf = await pdfFromImages(images, (i, t) => step(iFin, 'running', `${i} / ${t}`, i / t * 100));
+    step(iFin, 'done', `${images.length} стор. · ${fmtBytes(finalPdf.size)}`, 100);
+    return { wmPdf: wmPdfBlob, images, finalPdf, base: it.base, docx, ex, pages: images.length };
+  } catch (e) {
+    if (!(e instanceof Cancelled)) step(cur, 'error', friendlyError(e), null);
+    throw e;
+  }
+}
+
+async function run() {
+  if (S.ctl) { S.ctl.cancelled = true; $('#run').disabled = true; $('#run').textContent = 'Зупиняю…'; return; }
+  const wmo = getWm(), ex = getEx();
+  if (wmo.mode === 'image' && !wmo.img) { toast('Оберіть зображення для знака.'); return; }
+  if (wmo.mode === 'text' && !wmo.text.trim()) { toast('Введіть текст знака.'); return; }
+  const key = settingsKey(); const todo = todoItems(); if (!todo.length) return;
+  S.ctl = { cancelled: false }; setRunning(true);
+  const line = $('#batchline'); let ok = 0, failed = 0, stopped = false;
+  try {
+    for (let k = 0; k < todo.length; k++) {
+      const it = todo[k];
+      line.hidden = todo.length < 2; line.textContent = `Файл ${k + 1} з ${todo.length} · ${it.name}`;
+      it.status = 'running'; it.error = ''; refreshStatuses(); buildSteps(it.kind);
+      try {
+        const r = await processItem(it, wmo, ex);
+        it.results = r; it.key = key; it.status = 'done'; it.pageCount = r.pages; ok++;
+        if (S.items.length === 1) S.open.add(it.id);
+        renderList(); showResults();
+      } catch (e) {
+        if (e instanceof Cancelled) { it.status = 'queued'; stopped = true; break; }
+        console.error(e); it.status = 'error'; it.error = friendlyError(e); failed++; refreshStatuses();
+      }
+    }
+  } finally {
+    S.ctl = null; setRunning(false); refreshStatuses(); checkStale();
+  }
+  if (stopped) { toast('Обробку зупинено.'); line.hidden = todo.length < 2; line.textContent = `Зупинено: готово ${ok} з ${todo.length}`; }
+  else if (todo.length > 1) line.textContent = failed ? `Готово: ${ok} з ${todo.length}, з помилкою: ${failed}` : `Готово: усі файли (${ok})`;
+  else if (failed) toast(`${todo[0].name}: ${todo[0].error}`);
+}
+
+
+/* ---------- results & saving ---------- */
+async function saveBlob(name, blob) {
+  try {
+    const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+    if (dl) {
+      await dl.save({ filename: name, data: blob });
+      toast('Збережено: ' + name); return;
+    }
+  } catch (e) {
+    if (e && e.code === 'declined') return;
+    if (e && e.code === 'rate_limited') { toast('Зачекайте секунду й повторіть.'); return; }
+    if (e && e.code === 'too_large') { toast('Файл завеликий для збереження. Оберіть нижчу роздільність.'); return; }
+    // otherwise fall through to a plain download
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+async function zipImages(r) {
+  const z = new JSZip(); r.images.forEach(im => z.file(im.name, im.blob));
+  return z.generateAsync({ type: 'blob', compression: 'STORE' });
+}
+async function zipAll(items) {
+  const z = new JSZip(), multi = items.length > 1;
+  for (const it of items) {
+    const r = it.results, f = multi ? z.folder(r.base) : z;
+    f.file(`${r.base}_watermark.pdf`, r.wmPdf); f.file(`${r.base}_new.pdf`, r.finalPdf);
+    const g = f.folder(`${r.base}_images`); r.images.forEach(im => g.file(im.name, im.blob));
+  }
+  return z.generateAsync({ type: 'blob', compression: 'STORE' });
+}
+async function zipPdfs(items, which) {
+  const z = new JSZip();
+  items.forEach(it => { const r = it.results; if (which === 'wm') z.file(`${r.base}_watermark.pdf`, r.wmPdf); else z.file(`${r.base}_new.pdf`, r.finalPdf); });
+  return z.generateAsync({ type: 'blob', compression: 'STORE' });
+}
+
+function resRow(title, desc, meta, label, onClick, thumbs) {
+  const wrap = document.createDocumentFragment();
+  const row = document.createElement('div'); row.className = 'res';
+  const left = document.createElement('div');
+  const h = document.createElement('h3'); h.textContent = title;
+  const p = document.createElement('p'); p.textContent = desc;
+  const m = document.createElement('div'); m.className = 'meta'; m.textContent = meta;
+  left.append(h, m, p);
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label;
+  b.addEventListener('click', async () => { b.disabled = true; try { await onClick(); } catch (e) { toast('Помилка: ' + friendlyError(e)); } b.disabled = false; });
+  row.append(left, b);
+  if (thumbs) row.appendChild(thumbs);
+  wrap.appendChild(row); return wrap;
+}
+function actionBtn(label, fn) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label;
+  b.addEventListener('click', async () => { b.disabled = true; try { await fn(); } catch (e) { toast('Помилка: ' + friendlyError(e)); } b.disabled = false; });
+  return b;
+}
+
+function resultBody(it) {
+  const r = it.results; const body = document.createElement('div'); body.className = 'fbody';
+  body.appendChild(resRow('PDF із водяним знаком',
+    r.docx ? 'Сторінки Word перетворено на зображення, тому текст у цьому PDF не виділяється.' : 'Оригінальні сторінки зі знаком; текст і вектор збережено.',
+    `${r.pages} стор. · ${fmtBytes(r.wmPdf.size)}`, 'Зберегти PDF', () => saveBlob(`${r.base}_watermark.pdf`, r.wmPdf)));
+
+  const th = document.createElement('div'); th.className = 'thumbs';
+  r.images.forEach((im, i) => {
+    if (!im.thumb) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'thumb'; b.title = `Зберегти ${im.name}`;
+    const img = document.createElement('img'); img.alt = `Сторінка ${i + 1}`; img.src = im.thumb;
+    const s = document.createElement('span'); s.textContent = String(i + 1);
+    b.append(img, s); b.addEventListener('click', () => saveBlob(im.name, im.blob)); th.appendChild(b);
+  });
+  if (r.images.length > 40) { const more = document.createElement('span'); more.className = 'meta'; more.style.alignSelf = 'center'; more.textContent = `+${r.images.length - 40} у архіві`; th.appendChild(more); }
+  const imgBytes = r.images.reduce((s, x) => s + x.blob.size, 0);
+  body.appendChild(resRow('Зображення сторінок',
+    'Натисніть на мініатюру, щоб зберегти одну сторінку, або заберіть усі в архіві.',
+    `${r.images.length} × ${ext(r.ex.format).toUpperCase()} · ${r.ex.dpi} dpi · ${fmtBytes(imgBytes)}`, 'Зберегти ZIP',
+    async () => saveBlob(`${r.base}_images.zip`, await zipImages(r)), th));
+
+  body.appendChild(resRow('Новий PDF із зображень',
+    'Кожна сторінка — картинка зі знаком. Знак неможливо прибрати, текст не виділяється.',
+    `${r.images.length} стор. · ${fmtBytes(r.finalPdf.size)}`, 'Зберегти PDF', () => saveBlob(`${r.base}_new.pdf`, r.finalPdf)));
+  return body;
+}
+
+function showResults() {
+  const box = $('#results'); const done = S.items.filter(i => i.results);
+  box.replaceChildren();
+  if (!done.length) { box.hidden = true; return; }
+  const note = document.createElement('p'); note.className = 'stalenote'; note.hidden = true; note.id = 'stalenote';
+  note.textContent = 'Налаштування змінено. Файли нижче створено зі старими параметрами. Натисніть кнопку обробки, щоб оновити.';
+  box.appendChild(note);
+
+  for (const it of done) {
+    const r = it.results;
+    const det = document.createElement('details'); det.className = 'fileres'; det.open = S.open.has(it.id);
+    det.addEventListener('toggle', () => { if (det.open) S.open.add(it.id); else S.open.delete(it.id); });
+    const sum = document.createElement('summary');
+    const bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = it.kind === 'pdf' ? 'PDF' : 'DOCX';
+    const nm = document.createElement('b'); nm.textContent = it.name;
+    const mt = document.createElement('span'); mt.className = 'meta';
+    mt.textContent = `${r.pages} стор. · ${fmtBytes(r.wmPdf.size + r.finalPdf.size + r.images.reduce((s, x) => s + x.blob.size, 0))}`;
+    sum.append(bd, nm, mt); det.append(sum, resultBody(it)); box.appendChild(det);
+  }
+
+  const all = document.createElement('div'); all.className = 'allbar';
+  if (done.length > 1) {
+    all.appendChild(actionBtn('Усі PDF зі знаком (ZIP)', async () => saveBlob('watermark_pdfs.zip', await zipPdfs(done, 'wm'))));
+    all.appendChild(actionBtn('Усі нові PDF (ZIP)', async () => saveBlob('new_pdfs.zip', await zipPdfs(done, 'new'))));
+  }
+  all.appendChild(actionBtn(done.length > 1 ? `Зберегти все одним ZIP (${done.length})` : 'Зберегти все одним ZIP',
+    async () => saveBlob(done.length > 1 ? 'watermarked_documents.zip' : `${done[0].results.base}_all.zip`, await zipAll(done))));
+  box.appendChild(all);
+  box.hidden = false; checkStale();
+}
+
+function settingsKey() {
+  const w = getWm(), e = getEx();
+  return JSON.stringify([w.mode, w.text, w.font, w.bold, w.color, w.size, w.opacity, w.angle, w.layout, w.gap, wmImgName, e.format, e.dpi, e.quality]);
+}
+function checkStale() {
+  const key = settingsKey();
+  const stale = S.items.some(i => i.results && i.key !== key);
+  $('#results').classList.toggle('stale', stale);
+  const n = $('#stalenote'); if (n) n.hidden = !stale;
+  refreshStatuses(); updateRunBtn();
+}
+
+
+/* ---------- wiring ---------- */
+function onModeChange() {
+  const image = $('input[name=wm-mode]:checked').value === 'image';
+  // remember size for the mode we are leaving
+  const cur = image ? 'text' : 'image';
+  sizeValue[cur] = parseFloat($('#wm-size').value);
+  const m = image ? 'image' : 'text'; const [mn, mx, st] = sizeRange[m];
+  const sl = $('#wm-size'); sl.min = mn; sl.max = mx; sl.step = st; sl.value = sizeValue[m];
+  $('#box-text').hidden = image; $('#box-text').style.display = image ? 'none' : 'grid';
+  $('#box-image').hidden = !image;
+  updateOutputs(); scheduleRedraw();
+}
+function onLayoutChange() {
+  const v = $('input[name=wm-layout]:checked').value; const ang = $('#wm-angle');
+  if (v === 'bottom') { if (parseFloat(ang.value) !== 0) { prevAngle = ang.value; ang.value = 0; } }
+  else if (prevAngle != null && parseFloat(ang.value) === 0) { ang.value = prevAngle; prevAngle = null; }
+  else prevAngle = null;
+  $('#box-gap').hidden = v !== 'tile';
+  updateOutputs(); scheduleRedraw();
+}
+
+$$('input[name=wm-mode]').forEach(e => e.addEventListener('change', onModeChange));
+$$('input[name=wm-layout]').forEach(e => e.addEventListener('change', onLayoutChange));
+['#wm-text', '#wm-font', '#wm-bold', '#wm-color', '#wm-size', '#wm-opacity', '#wm-angle', '#wm-gap'].forEach(s => {
+  $(s).addEventListener('input', () => { updateOutputs(); scheduleRedraw(); });
+});
+['#ex-format', '#ex-dpi', '#ex-quality'].forEach(s => $(s).addEventListener('input', () => {
+  $('#box-quality').hidden = $('#ex-format').value === 'png'; updateOutputs(); checkStale();
+}));
+$$('#presets .chip').forEach(b => b.addEventListener('click', () => {
+  $('#wm-text').value = b.dataset.text; scheduleRedraw();
+}));
+$('#wm-image').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f); const im = new Image();
+  im.onload = () => { wmImg = im; wmImgName = f.name + ':' + f.size; $('#wm-image-name').textContent = f.name; scheduleRedraw(); };
+  im.onerror = () => { toast('Не вдалося прочитати це зображення.'); URL.revokeObjectURL(url); };
+  im.src = url;
+});
+$('#run').addEventListener('click', run);
+$('#clear').addEventListener('click', clearAll);
+
+updateOutputs();
+buildSteps('pdf');
+showSample();
+renderList();
+updateRunBtn();
+})();
+</script>
+
+</body></html>
